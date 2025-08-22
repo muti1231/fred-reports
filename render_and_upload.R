@@ -6,6 +6,12 @@ suppressPackageStartupMessages({
   library(googledrive)
   library(jsonlite)
 })
+# --- Patch: Allow SA key from env var ---
+sa_json_env <- Sys.getenv("GOOGLE_SA_KEY_JSON")
+if (nzchar(sa_json_env)) {
+  # Write JSON from env var to file so google APIs can read it
+  writeLines(sa_json_env, "service-account.json")
+}
 
 # --- Auth with Service Account ---
 SA_PATH <- Sys.getenv("GOOGLE_APPLICATION_CREDENTIALS", unset = "service-account.json")
