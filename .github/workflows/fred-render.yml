@@ -1,0 +1,56 @@
+name: Render and Upload FRED report
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Why triggered'
+        required: false
+  schedule:
+    - cron: '0 13 * * *'
+  push:
+    paths:
+      - '**/*.R'
+      - '**/*.qmd'
+      - '.github/workflows/fred-render.yml'
+
+concurrency:
+  group: fred-report
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_SA_KEY_JSON: ${{ secrets.GOOGLE_SA_KEY_JSON }}
+      GOOGLE_APPLICATION_CREDENTIALS: service-account.json
+      GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+      GOOGLE_FOLDER_ID: ${{ secrets.GOOGLE_FOLDER_ID }}
+      FRED_TABS: 'Annual_DGS10,Annual_DPRIME,Annual_PCETRIM12M159SFRBDAL,Annual_UMCSENT,Annual_PAYEMS,Annual_UNRATE'
+      EXCLUDE_CURRENT_YEAR: 'false'
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v3
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev libssl-dev libxml2-dev \
+            libfontconfig1-dev libharfbuzz-dev libfribidi-dev \
+            libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
+
+      - name: Install R packages
+        run: Rscript install_packages.R
+
+      - name: Render & upload report
+        run: Rscript render_and_upload.R
