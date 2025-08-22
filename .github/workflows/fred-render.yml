@@ -6,8 +6,9 @@ on:
       reason:
         description: 'Why triggered'
         required: false
+  # Optional daily schedule at 13:00 UTC (~09:00 ET)
   schedule:
-    - cron: '0 13 * * *'   # daily at 13:00 UTC (~09:00 ET, adjust as needed)
+    - cron: '0 13 * * *'
   push:
     paths:
       - '**/*.R'
@@ -22,10 +23,12 @@ jobs:
   render:
     runs-on: ubuntu-latest
     env:
+      # Secrets set in GitHub repo → Settings → Secrets and variables → Actions
       GOOGLE_SA_KEY_JSON: ${{ secrets.GOOGLE_SA_KEY_JSON }}
       GOOGLE_APPLICATION_CREDENTIALS: service-account.json
       GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
       GOOGLE_FOLDER_ID: ${{ secrets.GOOGLE_FOLDER_ID }}
+      # Config
       FRED_TABS: 'Annual_DGS10,Annual_DPRIME,Annual_PCETRIM12M159SFRBDAL,Annual_UMCSENT,Annual_PAYEMS,Annual_UNRATE'
       EXCLUDE_CURRENT_YEAR: 'false'
 
@@ -44,6 +47,11 @@ jobs:
       - name: Verify Quarto
         run: quarto --version
 
+      # Install TinyTeX so PDF rendering works
+      - name: Install TinyTeX (for PDF)
+        uses: r-lib/actions/setup-tinytex@v2
+
+      # Common system libs for building R packages
       - name: Install system dependencies
         run: |
           sudo apt-get update
