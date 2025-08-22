@@ -1,0 +1,93 @@
+---
+title: "Macro Dashboard (Annualized FRED Series)"
+author: "BKREA Automation"
+format:
+  html:
+    toc: true
+    number-sections: false
+    code-fold: show
+  pdf:
+    toc: true
+execute:
+  echo: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: setup
+# Load data + analysis results from analysis.R
+source("analysis.R")
+attach(analysis_objects)
+```
+
+## Overview
+
+This report pulls six annualized FRED series from Google Sheets (populated by Make.com), runs exploratory analysis, and presents visuals and model summaries.
+
+---
+
+## Coverage of Each Series
+
+```{r}
+library(gt)
+coverage_tbl |>
+  gt() |>
+  tab_header(title = "Series Coverage") |>
+  fmt_number(columns = n, decimals = 0)
+```
+
+---
+
+## Correlation Matrix
+
+```{r}
+gt::gt(as.data.frame(cors), rownames_to_stub = TRUE) |>
+  tab_header(title = "Pairwise Correlations (annual, pairwise.complete.obs)")
+```
+
+---
+
+## OLS Regression: UNRATE ~ DGS10 + DPRIME
+
+### Coefficient Estimates
+```{r}
+gt::gt(model_tidy) |>
+  tab_header(title = "Coefficient Estimates") |>
+  fmt_number(columns = c(estimate, std.error, statistic, p.value), decimals = 4)
+```
+
+### Model Fit Summary
+```{r}
+gt::gt(model_glance) |>
+  tab_header(title = "Model Fit (R², Adj. R², AIC, BIC, etc.)") |>
+  fmt_number(columns = where(is.numeric), decimals = 4)
+```
+
+---
+
+## Visualizations
+
+### Standardized (Z-Score) Comparison
+```{r}
+p_std
+```
+
+### All Series in Levels
+```{r}
+p_all
+```
+
+---
+
+## Bonus: Lagged Relationship (1-Year Lead)
+
+```{r}
+if (nrow(lag_tidy)) {
+  gt::gt(lag_tidy) |>
+    tab_header(title = "Lagged Regression (UNRATE ~ DGS10_lag1)") |>
+    fmt_number(columns = where(is.numeric), decimals = 4)
+} else {
+  cat("Not enough data to compute lag model.")
+}
+```
