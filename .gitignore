@@ -1,1 +1,27 @@
+# R / Posit
+.Rhistory
+.RData
+.Rproj.user/
+.Ruserdata
+.Rproj.user/*
+.Rproj.user*/**/*
+.Rproj.user*/suspended-session/*
+*.Rproj
+
+# Local config & secrets
+.Renviron
+.Renviron.*
+.secrets/
 service-account.json
+
+# Quarto / knitr outputs
+*_cache/
+*_files/
+.cache/
+.quarto/
+_site/
+.DS_Store
+
+# Rendered reports
+*.html
+*.pdf
