@@ -7,7 +7,7 @@ on:
         description: 'Why triggered'
         required: false
   schedule:
-    - cron: '0 13 * * *'
+    - cron: '0 13 * * *'   # daily at 13:00 UTC (~09:00 ET, adjust as needed)
   push:
     paths:
       - '**/*.R'
@@ -39,7 +39,10 @@ jobs:
           use-public-rspm: true
 
       - name: Set up Quarto
-        uses: quarto-dev/quarto-actions/setup@v3
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Verify Quarto
+        run: quarto --version
 
       - name: Install system dependencies
         run: |
